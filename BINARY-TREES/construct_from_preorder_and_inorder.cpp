@@ -1,0 +1,196 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+template <typename T>
+class BinaryTreeNode {
+public:
+	T data;
+	BinaryTreeNode*left;
+	BinaryTreeNode*right;
+	//constructor
+	BinaryTreeNode(T data) {
+		this->data = data;
+		left = NULL;
+		right = NULL;
+	}
+	~BinaryTreeNode() {
+		//recursive deletion
+		delete left;
+		delete right;
+	}
+};
+
+BinaryTreeNode<int> * takeInputLevelWise() {
+	int rootdata;
+	//cout << "Enter root data" << endl;
+	cin >> rootdata;
+
+	if (rootdata == -1) {
+		return NULL;
+	}
+
+	BinaryTreeNode<int> * root = new BinaryTreeNode<int>(rootdata);
+	queue<BinaryTreeNode<int> * > pendingNodes;
+	pendingNodes.push(root);
+	//nodes whose children are yet to be taken input.
+
+	while (pendingNodes.size() != 0) {
+		BinaryTreeNode<int> * front = pendingNodes.front();
+		pendingNodes.pop();
+		//cout << "Enter left child of " << front->data << endl;
+
+		int leftChildData;
+		cin >> leftChildData;
+
+		if (leftChildData != -1) {
+			BinaryTreeNode<int> * child = new BinaryTreeNode<int>(leftChildData);
+			front->left = child;
+			pendingNodes.push(child);
+		}
+
+
+		//cout << "Enter right child of " << front->data << endl;
+
+		int rightChildData;
+		cin >> rightChildData;
+
+		if (rightChildData != -1) {
+			BinaryTreeNode<int> * child = new BinaryTreeNode<int>(rightChildData);
+			front->right = child;
+			pendingNodes.push(child);
+		}
+	}
+
+	return root;
+}
+
+void printLevelWise(BinaryTreeNode<int> * root) {
+	queue<BinaryTreeNode<int> * > pendingNodes;
+	pendingNodes.push(root);
+
+
+
+	while (pendingNodes.size() != -1) {
+		BinaryTreeNode<int> * front = pendingNodes.front();
+		pendingNodes.pop();
+
+		cout << front->data << " : ";
+		if (front->left != NULL) {
+			cout << "L" << front->left->data << " , ";
+		}
+		if (front->right != NULL) {
+			cout << "R" << front->right->data;
+		}
+
+		cout << endl;
+		pendingNodes.push(front->left);
+		pendingNodes.push(front->right);
+
+	}
+}
+
+int nodesCount(BinaryTreeNode<int> * root) {
+	if (root == NULL) {
+		return 0;
+	}
+
+	return 1 + nodesCount(root->left) + nodesCount(root->right);
+}
+//1 2 3 4 5 6 7 -1 -1 -1 -1 8 9 -1 -1 -1 -1 -1 -1
+
+void inOrder(BinaryTreeNode<int> * root) {
+	// l -> node ->right
+
+	if (root == NULL) {
+		return;
+	}
+
+	inOrder(root->left);
+	cout << root->data << " ";
+	inOrder(root->right);
+
+}
+void preOrder(BinaryTreeNode<int> * root) {
+	if (root == NULL) {
+		return;
+	}
+
+	cout << root->data << " ";
+
+	preOrder(root->left);
+	preOrder(root->right);
+
+}
+
+void postOrder(BinaryTreeNode<int> * root) {
+	if (root == NULL) {
+		return;
+	}
+
+
+	postOrder(root->left);
+	postOrder(root->right);
+
+	cout << root->data << " ";
+}
+
+BinaryTreeNode<int> *  constructINandPRE(int * in, int * pre, int inS, int inE, int preS, int preE) {
+	if (inS > inE) {
+		return NULL;
+	}
+
+	BinaryTreeNode<int> * root = new BinaryTreeNode<int>(pre[preS]);
+	//for left
+
+	int rootIndex = -1;
+	for (int i = inS; i <= inE; i++) {
+		if (in[i] == pre[preS]) {
+			rootIndex = i;
+
+		}
+	}
+
+	int LinS = inS;
+	int LinE = rootIndex - 1;
+	int LpreS = preS + 1;
+	int LpreE = LinE - LinS + LpreS;
+
+
+	//for right//
+	int RinS = rootIndex + 1;
+	int RinE = inE;
+
+	int RpreS = LpreE + 1;
+	int RpreE = preE;
+
+	//done now recursive calls and connect em
+	BinaryTreeNode<int> * leftchild = constructINandPRE(in, pre , LinS, LinE, LpreS, LpreE);
+	BinaryTreeNode<int> * rightchild = constructINandPRE(in, pre, RinS, RinE, RpreS, RpreE);
+
+	root->left = leftchild;
+	root->right = rightchild;
+
+	return root;
+
+}
+int main() {
+	int n;
+	cin >> n;
+
+	int * pre = new int[n];
+
+	for (int i = 0; i < n; i++) {
+		cin >> pre[i];
+	}
+
+	int * in = new int[n];
+	for (int i = 0; i < n; i++) {
+		cin >> in[i];
+	}
+
+	BinaryTreeNode<int> * root = constructINandPRE(in, pre, 0, n - 1, 0, n - 1);
+	printLevelWise(root);
+
+
+	return 0;
+}
